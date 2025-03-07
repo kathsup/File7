@@ -32,10 +32,11 @@ public class EditorTexto extends JFrame {
 
     public EditorTexto() {
         setTitle("Editor de Texto");
-        setSize(800, 600);
+        setSize(1000, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
         if (!carpetaArchivos.exists()) carpetaArchivos.mkdir();
+        setLocationRelativeTo(null);
 
         modeloListaArchivos = new DefaultListModel<>();
         listaArchivos = new JList<>(modeloListaArchivos);
