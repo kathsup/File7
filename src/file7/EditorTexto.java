@@ -56,24 +56,23 @@ public class EditorTexto extends JFrame {
     private void applyStyle() {
         String fontFamily = (String) fontBox.getSelectedItem();
         int fontSize = (int) sizeBox.getSelectedItem();
-///para fonts
+
         SimpleAttributeSet attrs = new SimpleAttributeSet();
         StyleConstants.setFontFamily(attrs, fontFamily);
         StyleConstants.setFontSize(attrs, fontSize);
 
         textPane.setCharacterAttributes(attrs, false);
     }
-    
-      private void chooseColor() {
-          ///para colores
-        Color color = JColorChooser.showDialog(this, "Seleccione un color", Color.BLACK);
+
+    private void chooseColor() {
+        Color color = JColorChooser.showDialog(this, "Selecciona un color", Color.BLACK);
         if (color != null) {
             SimpleAttributeSet attrs = new SimpleAttributeSet();
             StyleConstants.setForeground(attrs, color);
             textPane.setCharacterAttributes(attrs, false);
         }
     }
-      
+
     private void guardarArchivo() {
         String contenido = GestorArchivo.convertirDocumentoATexto(textPane.getStyledDocument());
         GestorArchivo.guardarArchivo("archivo.txt", contenido);
