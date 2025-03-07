@@ -27,10 +27,10 @@ public class GestorArchivo {
     // Carga el contenido desde un archivo de texto
     public static String cargarArchivo(String ruta) {
         StringBuilder contenido = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(ruta))) {
-            String linea;
-            while ((linea = reader.readLine()) != null) {
-                contenido.append(linea).append("\n");
+        try (FileReader reader = new FileReader(ruta)) {
+            int i;
+            while ((i = reader.read()) != -1) {
+                contenido.append(i).append("\n");
             }
         } catch (IOException e) {
             e.printStackTrace();
