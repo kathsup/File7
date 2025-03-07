@@ -15,12 +15,6 @@ import java.io.*;
 
 public class GestorArchivo {
 
-    public void abrirArchivoConFormato(File archivo, JTextPane areaTexto) throws Exception {
-    String contenido = GestorArchivo.cargarArchivo(archivo.getAbsolutePath());
-    GestorArchivo.cargarTextoADocumento(areaTexto, contenido);
-}
-    
-    // Guarda el contenido en un archivo de texto
     public static void guardarArchivo(String ruta, String contenido) {
         try (FileWriter writer = new FileWriter(ruta)) {
             writer.write(contenido);
@@ -28,20 +22,13 @@ public class GestorArchivo {
             e.printStackTrace();
         }
     }
-    
-    //guardar de un archivo
-    public void guardarArchivoConFormato(File archivo, JTextPane areaTexto) throws Exception {
-    String contenido = GestorArchivo.convertirDocumentoATexto(areaTexto.getStyledDocument());
-    GestorArchivo.guardarArchivo(archivo.getAbsolutePath(), contenido);
-}
 
-    // Carga el contenido desde un archivo de texto
     public static String cargarArchivo(String ruta) {
         StringBuilder contenido = new StringBuilder();
         try (FileReader reader = new FileReader(ruta)) {
-            int i;
-            while ((i = reader.read()) != -1) {
-                contenido.append(i).append("\n");
+            int c;
+            while ((c = reader.read()) != -1) {
+                contenido.append((char) c);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -49,7 +36,6 @@ public class GestorArchivo {
         return contenido.toString();
     }
 
-    // Convierte el StyledDocument en un String con formato (color, fuente, tamaño)
     public static String convertirDocumentoATexto(StyledDocument doc) {
         StringBuilder resultado = new StringBuilder();
 
@@ -81,32 +67,25 @@ public class GestorArchivo {
         return resultado.toString();
     }
 
-    // Carga un String con formato a un StyledDocument
     public static void cargarTextoADocumento(JTextPane textPane, String contenido) {
         StyledDocument doc = textPane.getStyledDocument();
         try {
-            doc.remove(0, doc.getLength()); // Limpiar documento
-            String[] lineas = contenido.split("\n");
-
-            for (String linea : lineas) {
+            doc.remove(0, doc.getLength());
+            for (String linea : contenido.split("\n")) {
                 if (linea.trim().isEmpty()) continue;
-                
+
                 String[] partes = linea.split("\\|");
                 if (partes.length < 4) continue;
 
                 String texto = partes[0];
-                String font = partes[1];
-                int size = Integer.parseInt(partes[2]);
-                Color color = Color.decode(partes[3]);
-
                 SimpleAttributeSet attrs = new SimpleAttributeSet();
-                StyleConstants.setFontFamily(attrs, font);
-                StyleConstants.setFontSize(attrs, size);
-                StyleConstants.setForeground(attrs, color);
+                StyleConstants.setFontFamily(attrs, partes[1]);
+                StyleConstants.setFontSize(attrs, Integer.parseInt(partes[2]));
+                StyleConstants.setForeground(attrs, Color.decode(partes[3]));
 
                 doc.insertString(doc.getLength(), texto, attrs);
             }
-        } catch (BadLocationException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
