@@ -15,6 +15,11 @@ import java.io.*;
 
 public class GestorArchivo {
 
+    public void abrirArchivoConFormato(File archivo, JTextPane areaTexto) throws Exception {
+    String contenido = GestorArchivo.cargarArchivo(archivo.getAbsolutePath());
+    GestorArchivo.cargarTextoADocumento(areaTexto, contenido);
+}
+    
     // Guarda el contenido en un archivo de texto
     public static void guardarArchivo(String ruta, String contenido) {
         try (FileWriter writer = new FileWriter(ruta)) {
@@ -23,6 +28,12 @@ public class GestorArchivo {
             e.printStackTrace();
         }
     }
+    
+    //guardar de un archivo
+    public void guardarArchivoConFormato(File archivo, JTextPane areaTexto) throws Exception {
+    String contenido = GestorArchivo.convertirDocumentoATexto(areaTexto.getStyledDocument());
+    GestorArchivo.guardarArchivo(archivo.getAbsolutePath(), contenido);
+}
 
     // Carga el contenido desde un archivo de texto
     public static String cargarArchivo(String ruta) {

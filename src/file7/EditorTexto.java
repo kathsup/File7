@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 
 public class EditorTexto extends JFrame {
     private JTextPane textPane;
@@ -80,8 +81,21 @@ public class EditorTexto extends JFrame {
     }
 
     private void abrirArchivo() {
-        String contenido = GestorArchivo.cargarArchivo("archivo.txt");
-        GestorArchivo.cargarTextoADocumento(textPane, contenido);
-        JOptionPane.showMessageDialog(this, "Archivo cargado correctamente.");
+    JFileChooser selector = new JFileChooser();
+    int opcion = selector.showOpenDialog(this);
+    
+    if (opcion == JFileChooser.APPROVE_OPTION) {
+        File archivo = selector.getSelectedFile();
+        try {
+            String contenido = GestorArchivo.cargarArchivo(archivo.getAbsolutePath());
+            GestorArchivo.cargarTextoADocumento(textPane, contenido);
+            JOptionPane.showMessageDialog(this, "Archivo cargado correctamente.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al abrir el archivo: " + ex.getMessage());
+            ex.printStackTrace(); // Para depurar el error en la consola
+        }
     }
+}
+
+
 }
