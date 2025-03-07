@@ -109,7 +109,4 @@ public class GestorArchivo {
             textPane.setStyledDocument(doc);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-    }
-    
-}
+        }}}

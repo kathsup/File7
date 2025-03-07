@@ -42,11 +42,18 @@ public class EditorTexto extends JFrame {
         listaArchivos = new JList<>(modeloListaArchivos);
         listaArchivos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         listaArchivos.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) abrirArchivoDesdeLista(listaArchivos.getSelectedValue());
+            if (!e.getValueIsAdjusting()) {
+                abrirArchivoDesdeLista(listaArchivos.getSelectedValue());
+            }
         });
 
         cargarArchivosEnLista();
-        add(new JScrollPane(listaArchivos), BorderLayout.WEST);
+
+        
+        JScrollPane panelLista = new JScrollPane(listaArchivos);
+        panelLista.setPreferredSize(new Dimension(200, getHeight()));
+        add(panelLista, BorderLayout.WEST);
+
         textPane = new JTextPane();
         add(new JScrollPane(textPane), BorderLayout.CENTER);
         add(crearBarraHerramientas(), BorderLayout.NORTH);
@@ -169,7 +176,7 @@ public class EditorTexto extends JFrame {
         }
     }
 
-    private void cargarArchivosEnLista() {
+    private void cargarArchivosEnLista() { 
         modeloListaArchivos.clear();
         File[] archivos = carpetaArchivos.listFiles((dir, name) -> name.endsWith(".txt"));
         if (archivos != null) {
