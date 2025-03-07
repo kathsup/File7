@@ -15,6 +15,7 @@ import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 
@@ -156,15 +157,31 @@ public class EditorTexto extends JFrame {
         textPane.setCharacterAttributes(attrs, false);
     }
 
-    private void guardarArchivo() {
-        String nombreArchivo = JOptionPane.showInputDialog(this, "Nombre del archivo:");
-        if (nombreArchivo == null || nombreArchivo.trim().isEmpty()) return;
-        File archivo = new File(carpetaArchivos, nombreArchivo + ".txt");
-        String contenido = GestorArchivo.convertirDocumentoATexto(textPane.getStyledDocument());
-        GestorArchivo.guardarArchivo(archivo.getAbsolutePath(), contenido);
+    private void abrirEnWord(File archivo) {
+    try {
+        Desktop.getDesktop().open(archivo); 
+    } catch (IOException e) {
+        JOptionPane.showMessageDialog(this, "No se pudo abrir el archivo en Word.");
+    }
+}
+
+    
+   private void guardarArchivo() {
+    String nombreArchivo = JOptionPane.showInputDialog(this, "Nombre del archivo:");
+    if (nombreArchivo == null || nombreArchivo.trim().isEmpty()) return;
+
+    File archivo = new File(carpetaArchivos, nombreArchivo + ".rtf");
+
+    try {
+        GestorArchivo.guardarArchivoRTF(archivo.getAbsolutePath(), textPane);
         JOptionPane.showMessageDialog(this, "Archivo guardado correctamente.");
         cargarArchivosEnLista();
+        abrirEnWord(archivo); 
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error al guardar el archivo: " + e.getMessage());
     }
+}
+
 
     private void abrirArchivoManual() {
         JFileChooser selector = new JFileChooser();
@@ -176,21 +193,48 @@ public class EditorTexto extends JFrame {
         }
     }
 
-    private void cargarArchivosEnLista() { 
-        modeloListaArchivos.clear();
-        File[] archivos = carpetaArchivos.listFiles((dir, name) -> name.endsWith(".txt"));
-        if (archivos != null) {
-            for (File archivo : archivos) {
-                modeloListaArchivos.addElement(archivo.getName());
-            }
+    private void cargarArchivosEnLista() {
+    modeloListaArchivos.clear(); 
+    
+    File[] archivos = carpetaArchivos.listFiles((dir, name) -> name.toLowerCase().endsWith(".rtf"));
+
+    if (archivos != null) {
+        for (File archivo : archivos) {
+            modeloListaArchivos.addElement(archivo.getName()); 
         }
     }
+}
 
-    private void abrirArchivoDesdeLista(String nombreArchivo) {
-        if (nombreArchivo == null) return;
-        File archivo = new File(carpetaArchivos, nombreArchivo);
-        String contenido = GestorArchivo.cargarArchivo(archivo.getAbsolutePath());
-        GestorArchivo.cargarTextoADocumento(textPane, contenido);
-        JOptionPane.showMessageDialog(this, "Archivo cargado desde la lista.");
+   private void abrirArchivo() {
+    JFileChooser selector = new JFileChooser();
+    selector.setDialogTitle("Abrir archivo");
+    selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Rich Text Format (*.txt)", "rtf"));
+
+    int opcion = selector.showOpenDialog(this);
+    if (opcion == JFileChooser.APPROVE_OPTION) {
+        File archivo = selector.getSelectedFile();
+        try {
+            GestorArchivo.cargarArchivoRTF(archivo.getAbsolutePath(), textPane);
+            JOptionPane.showMessageDialog(this, "Archivo cargado correctamente.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al abrir el archivo: " + ex.getMessage());
+            ex.printStackTrace();
+        }
     }
+}
+
+    
+   private void abrirArchivoDesdeLista(String nombreArchivo) {
+    if (nombreArchivo == null) return;
+    
+    File archivo = new File(carpetaArchivos, nombreArchivo);
+
+    try {
+        GestorArchivo.cargarArchivoRTF(archivo.getAbsolutePath(), textPane);
+        JOptionPane.showMessageDialog(this, "Archivo cargado correctamente desde la lista.");
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Error al abrir el archivo: " + e.getMessage());
+    }
+}
+
 }

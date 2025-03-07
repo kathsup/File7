@@ -1,3 +1,0 @@
-icamiloa
-|Dialog|12|#ff9999
-jh|Dialog|12|#ff9999

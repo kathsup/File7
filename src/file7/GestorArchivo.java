@@ -102,11 +102,13 @@ public class GestorArchivo {
     }
 
     public static void cargarArchivoRTF(String ruta, JTextPane textPane) {
-        try (FileInputStream fis = new FileInputStream(ruta)) {
-            RTFEditorKit kit = new RTFEditorKit();
-            StyledDocument doc = new DefaultStyledDocument();
-            kit.read(fis, doc, 0);
-            textPane.setStyledDocument(doc);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }}}
+    try (FileInputStream fis = new FileInputStream(ruta)) {
+        RTFEditorKit kit = new RTFEditorKit();
+        StyledDocument doc = new DefaultStyledDocument(); 
+        kit.read(fis, doc, 0);
+        textPane.setStyledDocument(doc);
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+}
