@@ -15,7 +15,7 @@ import java.io.*;
 
 public class GestorArchivo {
 
-    // Guarda el contenido en un archivo de texto
+    
     public static void guardarArchivo(String ruta, String contenido) {
         try (FileWriter writer = new FileWriter(ruta)) {
             writer.write(contenido);
@@ -24,10 +24,11 @@ public class GestorArchivo {
         }
     }
 
-    // Carga el contenido desde un archivo de texto
+ 
     public static String cargarArchivo(String ruta) {
         StringBuilder contenido = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(new FileReader(ruta))) {
+        try 
+            (BufferedReader reader = new BufferedReader(new FileReader(ruta))) {
             String linea;
             while ((linea = reader.readLine()) != null) {
                 contenido.append(linea).append("\n");
@@ -38,7 +39,7 @@ public class GestorArchivo {
         return contenido.toString();
     }
 
-    // Convierte el StyledDocument en un String con formato (color, fuente, tamaño)
+ 
     public static String convertirDocumentoATexto(StyledDocument doc) {
         StringBuilder resultado = new StringBuilder();
 
@@ -70,7 +71,7 @@ public class GestorArchivo {
         return resultado.toString();
     }
 
-    // Carga un String con formato a un StyledDocument
+   
     public static void cargarTextoADocumento(JTextPane textPane, String contenido) {
         StyledDocument doc = textPane.getStyledDocument();
         try {
