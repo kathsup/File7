@@ -143,15 +143,31 @@ public class EditorTexto extends JFrame {
         textPane.setCharacterAttributes(attrs, false);
     }
 
-    private void guardarArchivo() {
-        JFileChooser selector = new JFileChooser();
-        if (selector.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-            File archivo = selector.getSelectedFile();
-            String contenido = GestorArchivo.convertirDocumentoATexto(textPane.getStyledDocument());
-            GestorArchivo.guardarArchivo(archivo.getAbsolutePath(), contenido);
-            JOptionPane.showMessageDialog(this, "Archivo guardado correctamente.");
+   private void guardarArchivo() {
+    JFileChooser selector = new JFileChooser();
+    selector.setDialogTitle("Guardar como");
+    selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Rich Text Format (*.rtf)", "rtf"));
+
+    int opcion = selector.showSaveDialog(this);
+    if (opcion == JFileChooser.APPROVE_OPTION) {
+        File archivo = selector.getSelectedFile();
+        String ruta = archivo.getAbsolutePath();
+
+        // Asegurar que el archivo tenga la extensión .rtf
+        if (!ruta.toLowerCase().endsWith(".rtf")) {
+            ruta += ".rtf";
+        }
+
+        try {
+            GestorArchivo.guardarArchivoRTF(ruta, textPane);
+            JOptionPane.showMessageDialog(this, "Archivo guardado correctamente en formato RTF.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error al guardar el archivo: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
+}
+
 
     private void abrirArchivo() {
         JFileChooser selector = new JFileChooser();

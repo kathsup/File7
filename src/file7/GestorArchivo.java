@@ -12,6 +12,8 @@ import javax.swing.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.io.*;
+import javax.swing.text.rtf.RTFEditorKit;
+
 
 public class GestorArchivo {
 
@@ -89,4 +91,25 @@ public class GestorArchivo {
             e.printStackTrace();
         }
     }
+    //guarda en documento 
+   public static void guardarArchivoRTF(String ruta, JTextPane textPane) {
+        try (FileOutputStream fos = new FileOutputStream(ruta)) {
+            RTFEditorKit kit = new RTFEditorKit();
+            kit.write(fos, textPane.getStyledDocument(), 0, textPane.getStyledDocument().getLength());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void cargarArchivoRTF(String ruta, JTextPane textPane) {
+        try (FileInputStream fis = new FileInputStream(ruta)) {
+            RTFEditorKit kit = new RTFEditorKit();
+            StyledDocument doc = new DefaultStyledDocument();
+            kit.read(fis, doc, 0);
+            textPane.setStyledDocument(doc);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
 }
