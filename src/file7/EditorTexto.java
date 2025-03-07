@@ -10,6 +10,7 @@ package file7;
  */
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.*;
 import javax.swing.text.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -23,24 +24,35 @@ public class EditorTexto extends JFrame {
     private JComboBox<String> fontBox;
     private JComboBox<Integer> sizeBox;
     private JPanel colorPanel;
-
+    private JList<String> listaArchivos;
+    private DefaultListModel<String> modeloListaArchivos;
     private final Queue<Color> coloresRecientes = new LinkedList<>();
-    private final int MAX_COLORES = 15;  // Máximo de colores mostrados
+    private final int MAX_COLORES = 15;
+    private final File carpetaArchivos = new File("archivos_guardados");
 
     public EditorTexto() {
         setTitle("Editor de Texto");
-        setSize(1000, 600);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
-        setLocationRelativeTo(null);
-        
+        if (!carpetaArchivos.exists()) carpetaArchivos.mkdir();
 
+        modeloListaArchivos = new DefaultListModel<>();
+        listaArchivos = new JList<>(modeloListaArchivos);
+        listaArchivos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        listaArchivos.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) abrirArchivoDesdeLista(listaArchivos.getSelectedValue());
+        });
+
+        cargarArchivosEnLista();
+        add(new JScrollPane(listaArchivos), BorderLayout.WEST);
         textPane = new JTextPane();
         add(new JScrollPane(textPane), BorderLayout.CENTER);
+        add(crearBarraHerramientas(), BorderLayout.NORTH);
+    }
 
-        JPanel barraSuperior = new JPanel();
-        barraSuperior.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 5));
-
+    private JPanel crearBarraHerramientas() {
+        JPanel barraSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
         barraSuperior.add(new JLabel("Fuente:"));
         fontBox = new JComboBox<>(GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames());
         fontBox.setPreferredSize(new Dimension(150, 25));
@@ -75,21 +87,19 @@ public class EditorTexto extends JFrame {
 
         JButton btnAbrir = new JButton("Abrir");
         btnAbrir.setPreferredSize(new Dimension(100, 25));
-        btnAbrir.addActionListener(e -> abrirArchivo());
+        btnAbrir.addActionListener(e -> abrirArchivoManual());
         barraSuperior.add(btnAbrir);
 
-        add(barraSuperior, BorderLayout.NORTH);
         actualizarPanelColores();
+        return barraSuperior;
     }
 
     private void aplicarEstilo() {
         String fuente = (String) fontBox.getSelectedItem();
         int tamano = (int) sizeBox.getSelectedItem();
-
         SimpleAttributeSet attrs = new SimpleAttributeSet();
         StyleConstants.setFontFamily(attrs, fuente);
         StyleConstants.setFontSize(attrs, tamano);
-
         textPane.setCharacterAttributes(attrs, false);
     }
 
@@ -105,16 +115,13 @@ public class EditorTexto extends JFrame {
 
     private void agregarColorReciente(Color color) {
         if (coloresRecientes.contains(color)) return;
-        if (coloresRecientes.size() >= MAX_COLORES) {
-            coloresRecientes.poll();  // FIFO: saca el más viejo
-        }
+        if (coloresRecientes.size() >= MAX_COLORES) coloresRecientes.poll();
         coloresRecientes.add(color);
         actualizarPanelColores();
     }
 
     private void actualizarPanelColores() {
         colorPanel.removeAll();
-
         for (Color color : coloresRecientes) {
             JButton colorButton = new JButton();
             colorButton.setBackground(color);
@@ -124,7 +131,6 @@ public class EditorTexto extends JFrame {
             colorButton.addActionListener(e -> aplicarColor(color));
             colorPanel.add(colorButton);
         }
-
         while (colorPanel.getComponentCount() < MAX_COLORES) {
             JButton emptyButton = new JButton();
             emptyButton.setEnabled(false);
@@ -132,7 +138,6 @@ public class EditorTexto extends JFrame {
             emptyButton.setPreferredSize(new Dimension(25, 25));
             colorPanel.add(emptyButton);
         }
-
         colorPanel.revalidate();
         colorPanel.repaint();
     }
@@ -143,33 +148,17 @@ public class EditorTexto extends JFrame {
         textPane.setCharacterAttributes(attrs, false);
     }
 
-   private void guardarArchivo() {
-    JFileChooser selector = new JFileChooser();
-    selector.setDialogTitle("Guardar como");
-    selector.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Rich Text Format (*.rtf)", "rtf"));
-
-    int opcion = selector.showSaveDialog(this);
-    if (opcion == JFileChooser.APPROVE_OPTION) {
-        File archivo = selector.getSelectedFile();
-        String ruta = archivo.getAbsolutePath();
-
-        // Asegurar que el archivo tenga la extensión .rtf
-        if (!ruta.toLowerCase().endsWith(".rtf")) {
-            ruta += ".rtf";
-        }
-
-        try {
-            GestorArchivo.guardarArchivoRTF(ruta, textPane);
-            JOptionPane.showMessageDialog(this, "Archivo guardado correctamente en formato RTF.");
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error al guardar el archivo: " + ex.getMessage());
-            ex.printStackTrace();
-        }
+    private void guardarArchivo() {
+        String nombreArchivo = JOptionPane.showInputDialog(this, "Nombre del archivo:");
+        if (nombreArchivo == null || nombreArchivo.trim().isEmpty()) return;
+        File archivo = new File(carpetaArchivos, nombreArchivo + ".txt");
+        String contenido = GestorArchivo.convertirDocumentoATexto(textPane.getStyledDocument());
+        GestorArchivo.guardarArchivo(archivo.getAbsolutePath(), contenido);
+        JOptionPane.showMessageDialog(this, "Archivo guardado correctamente.");
+        cargarArchivosEnLista();
     }
-}
 
-
-    private void abrirArchivo() {
+    private void abrirArchivoManual() {
         JFileChooser selector = new JFileChooser();
         if (selector.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             File archivo = selector.getSelectedFile();
@@ -177,5 +166,23 @@ public class EditorTexto extends JFrame {
             GestorArchivo.cargarTextoADocumento(textPane, contenido);
             JOptionPane.showMessageDialog(this, "Archivo abierto correctamente.");
         }
+    }
+
+    private void cargarArchivosEnLista() {
+        modeloListaArchivos.clear();
+        File[] archivos = carpetaArchivos.listFiles((dir, name) -> name.endsWith(".txt"));
+        if (archivos != null) {
+            for (File archivo : archivos) {
+                modeloListaArchivos.addElement(archivo.getName());
+            }
+        }
+    }
+
+    private void abrirArchivoDesdeLista(String nombreArchivo) {
+        if (nombreArchivo == null) return;
+        File archivo = new File(carpetaArchivos, nombreArchivo);
+        String contenido = GestorArchivo.cargarArchivo(archivo.getAbsolutePath());
+        GestorArchivo.cargarTextoADocumento(textPane, contenido);
+        JOptionPane.showMessageDialog(this, "Archivo cargado desde la lista.");
     }
 }
